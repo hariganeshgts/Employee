@@ -16,11 +16,9 @@ const useStyles = makeStyles((theme)=>({
 function Employee(){
 
     const [values, setValues] = useState('');
-    const[notify,setNotify]= useState({isOpen:false,
-      message:"",
-      type:''})
     
-    const [toggle,setToggle] = useState(true);   
+    const [toggle,setToggle] = useState(true);
+    const[edit,setEdit]=useState('');   
  
     const classes= useStyles();
 
@@ -31,42 +29,53 @@ function Employee(){
         setToggle(true);
       
     }
-        
+    
+    
+
+    
+     const getapi=()=> {  
     //**import all employees */
-    useEffect(()=> {    
+      
       const url="https://emp-crud-swagger.herokuapp.com/Employees"  
       fetch(url)
         .then(response => response.json())
         .then(response => {
-          console.log("getapi",response);
+         
           setValues(
              response
           )
+          
         })
         .catch(err => { console.log(err); 
         });
-      },[]);        
+       
+        console.log(values);
+       
+    }  
+
+    
       
       const postApi=(input)=>{
-        console.log(input);     
-            fetch("https://emp-crud-swagger.herokuapp.com/Employees", {
+        console.log(input);          
+            fetch("https://emp-crud-swagger.herokuapp.com/employees", {
                 "method": "POST",
                 "headers": {
                     "content-type": "application/json",
                     "accept": "application/json"
                 },
-                "body": JSON.stringify({
-                    firstName: values.firstName,
-                    lastName: values.lastName,
-                    dob:values.dob,
-                    email:values.email,
-                    address:values.address,
-                    phoneNumber:values.phoneNumber,
-                    desigNation:values.desigNation,
-                    city: values.city,
-                    gender: values.gender,
-                    salary: values.salary,
+                "body": JSON.stringify({ ...values,
+                    firstName: input.firstName,
+                    lastName:input.lastName,
+                    dob:input.dob,
+                    email:input.email,
+                    address:input.address,
+                    phoneNumber:input.phoneNumber,
+                    desigNation:input.desigNation,
+                    city: input.city,
+                    gender: input.gender,
+                    salary: input.salary,
                 })
+                
             })
                 .then(response => response.json())
                 .then(response => {
@@ -75,16 +84,13 @@ function Employee(){
                 .catch(err => {
                     console.log(err);
                 });
+                
         }
-          
+     
+     
      //delete function
       const Delete = (id) => {
-        setNotify({
-            isOpen:true,
-            message:"Are sure you need to delete",
-            type:'error'
-          })
-          console.log(values._id);
+       console.log(values._id);
       // deletes entities
         fetch(`https://emp-crud-swagger.herokuapp.com/Employees/${id}`, {
           "method": "DELETE",
@@ -102,37 +108,41 @@ function Employee(){
         });
         console.log(id);
      }
-  
-          //Update
-      const Update = (id) => {
+        //Update
+          const Update = (id) => {
         // this will update entries with PUT
-         useEffect(() => {
-          fetch(`https://emp-crud-swagger.herokuapp.com/Employees/${id}`, {
+              fetch(`https://emp-crud-swagger.herokuapp.com/Employees/${id}`, {
               "method": "PUT",
               "headers": {
                   "content-type": "application/json",
                   "accept": "application/json"
               },
               "body": JSON.stringify({
-                    
-                    firstName: values.firstName,
-                    lastName: values.lasttName,
-                    D_O_B: values.D_O_B,
-                    email: values.email,
-                    address:values.address,
-                    phoneNumber: values.phoneNumber,
-                    designation: values.designation,
-                    city: values.city,
-                    gender: values.gender,
-                    salary: values.salary,
+                    firstName: edit.firstName,
+                    lastName: edit.lasttName,
+                    dob:edit.dob,
+                    email:edit.email,
+                    address:edit.address,
+                    phoneNumber: edit.phoneNumber,
+                    designation: edit.designation,
+                    city:edit.city,
+                    gender: edit.gender,
+                    salary: edit.salary,
               })
               })
               .then(response => response.json())
-              .then(response => { console.log(response);
+              .then(response => { 
+                setEdit(
+                 response
+                )
+               
               })
-              .catch(err => { console.log(err); });
-         })
-      }
+             .catch(err => { console.log(err); });
+            
+            }
+            useEffect(()=>{getapi()},[])
+
+     
      // console.log(values);
 
     return(
@@ -140,7 +150,7 @@ function Employee(){
           <Paper  className={classes.pageContent}>
             {toggle?
                 <CreateEmployeeForm changeToggle={changeToggle} values={values} postApi={postApi} />
-            :<DataTable values={values} Toggle={removeToggle}  Delete={Delete} Update={Update} />}
+            :<DataTable values={values} Toggle={removeToggle}  Delete={Delete} Update={Update} postApi={postApi}  />}
           </Paper>
         </>
     )

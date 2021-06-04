@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -8,7 +8,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import AddIcon from '@material-ui/icons/Add';
-import { Button } from '@material-ui/core';
+import { Button, ThemeProvider } from '@material-ui/core';
 import PageHeader from '../PageHeader';
 import PeopleOutlineTwoToneIcon from '@material-ui/icons/PeopleOutline';
 import TextField from '@material-ui/core/TextField';
@@ -24,24 +24,39 @@ import FormLabel from '@material-ui/core/FormLabel';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
+import{toast} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 const useStyles = makeStyles({
 
   table: {
     minWidth: 650,
   },
+ 
 
 });
 
 
-export default function DenseTable({  values,Toggle,Delete,Update}) {
+toast.configure()
+
+export default function DenseTable({setUpdate,edit, values,Toggle,Delete,Update}) {
 
   const classes = useStyles();
   
   const [open, setOpen] = React.useState(false);
+  const notify=()=>{
+    toast.error('Employee is successfully deleted',{position:toast.POSITION.TOP_CENTER});
+  }
 
-  
+  const handleSubmit=(id)=>{
+    Update(id,edit)
+  }
 
+
+  const handleInputChange=()=>{
+   setUpdate();
+  }
 
   const handleClickOpen = () => {
    
@@ -52,18 +67,14 @@ export default function DenseTable({  values,Toggle,Delete,Update}) {
     setOpen(false);
   };
 
-
-  
- 
-  
- 
-
-  //toggle
+//toggle
   const goggle = () => {
     Toggle();
   }
+ 
 
-  return (
+
+return (
     <div>
       <PageHeader
         title="All Employee"
@@ -83,11 +94,10 @@ export default function DenseTable({  values,Toggle,Delete,Update}) {
                 <TableCell >Email</TableCell>
                 <TableCell >Phone Number</TableCell>
                 <TableCell align="center">Actions</TableCell>
-
               </TableRow>
             </TableHead>
             <TableBody>
-              {values.map((row) => (
+              {values.employees.map((row) => (
                 <TableRow key={row._id}>
                   <TableCell component="th" scope="row">
                     {row.firstName}
@@ -96,10 +106,13 @@ export default function DenseTable({  values,Toggle,Delete,Update}) {
                   <TableCell >{row.email}</TableCell>
                   <TableCell >{row.phoneNumber}</TableCell>
                   <TableCell>
-                    <Button variant="contained" color="primary" onClick={()=>Update(row._id)}>
+                    <Button variant="contained" color="primary" onClick={()=>{Update(row._id)
+                    handleClickOpen()}}>
                       UPDATE
                   </Button>
-                    <Button variant="contained" color="secondary" onClick={()=>Delete(row._id)} >
+                    <Button variant="contained" color="secondary" onClick={()=>{
+                      Delete(row._id)
+                      notify()}} >
                       DELETE
                   </Button>
                     <Button variant="contained" color="default" onClick={handleClickOpen} >
@@ -112,20 +125,24 @@ export default function DenseTable({  values,Toggle,Delete,Update}) {
             </TableBody>
           </Table>
         </TableContainer>
-        <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+        <Dialog open={open} onClose={handleClose}  className={classes.Dialog} aria-labelledby="form-dialog-title">
           <DialogTitle id="form-dialog-title">Edit Employee</DialogTitle>
+        
             <Grid container>
               <Grid item xs={6}>
                 <TextField
                   variant="outlined"
                   label="First Name"
                   name="firstName"
+                  onChange={handleInputChange}
                   value={values.firstName}
+                
                 />
                 <TextField
                   variant="outlined"
                   label="last Name"
                   name="lastName"
+                  onChange={handleInputChange}
                   value={values.lastName}
                 />
                 <TextField
@@ -133,7 +150,8 @@ export default function DenseTable({  values,Toggle,Delete,Update}) {
                   label="Birthday"
                   type="date"
                   name="dob"
-                  values={values.dob}
+                  value={values.dob}
+                  onChange={handleInputChange}
                   className={classes.textField}
                   InputLabelProps={{
                     shrink: true,
@@ -144,18 +162,21 @@ export default function DenseTable({  values,Toggle,Delete,Update}) {
                   variant="outlined"
                   label="Email"
                   name="email"
+                  onChange={handleInputChange}
                   value={values.email}
                 />
                 <TextField
                   variant="outlined"
                   label="address"
                   name="address"
+                  onChange={handleInputChange}
                   value={values.address}
                 />
                 <TextField
                   variant="outlined"
                   label="Phone Number"
                   name="phoneNumber"
+                  onChange={handleInputChange}
                   value={values.phoneNumber}
                 />
               </Grid>
@@ -174,10 +195,11 @@ export default function DenseTable({  values,Toggle,Delete,Update}) {
                   variant="outlined"
                   label="City"
                   name="city"
+                  onChange={handleInputChange}
                   value={values.city}
                 />
                 <FormLabel component="legend">Gender</FormLabel>
-                <RadioGroup name="gender" row={true}>
+                <RadioGroup name="gender" row={true} value={values.gender}>
                   <FormControlLabel value="female" control={<Radio />} label="Female" />
                   <FormControlLabel value="male" control={<Radio />} label="Male" />
                   <FormControlLabel value="other" control={<Radio />} label="Other" />
@@ -186,6 +208,7 @@ export default function DenseTable({  values,Toggle,Delete,Update}) {
                   variant="outlined"
                   label="Salary in Rupees"
                   name="salary"
+                  onChange={handleInputChange}
                   value={values.salary}
                 />
                 <br></br>
@@ -197,7 +220,9 @@ export default function DenseTable({  values,Toggle,Delete,Update}) {
             <Button onClick={handleClose} color="primary">
               Cancel
           </Button>
-            <Button onClick={handleClose} color="primary">
+            <Button onClick={()=>{handleClose()
+            handleSubmit()
+           }} color="primary">
               Submit
           </Button>
           </DialogActions>
