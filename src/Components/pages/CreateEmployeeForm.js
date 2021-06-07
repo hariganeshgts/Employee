@@ -44,7 +44,7 @@ toast.configure()
 
 function CreateEmployeeForm({ values, changeToggle,postApi,validateOnChange = false}) {
     const initialFValues = {
-        id: '',
+        id: null,
         firstName: '',
         lastName: '',
         dob:Date(),
@@ -70,7 +70,7 @@ function CreateEmployeeForm({ values, changeToggle,postApi,validateOnChange = fa
   
 
     //Validation
-    const validate = (fieldValues = values) => {
+    const validate = (fieldValues = input) => {
         let temp = { ...errors }
         if ('firstName' in fieldValues)
             temp.firstName = fieldValues.firstName ? "" : "This field is required."
@@ -92,7 +92,7 @@ function CreateEmployeeForm({ values, changeToggle,postApi,validateOnChange = fa
             ...temp
         })
 
-        if (fieldValues == values)
+        if (fieldValues == input)
             return Object.values(temp).every(x => x == "")
     }
 
@@ -111,7 +111,8 @@ function CreateEmployeeForm({ values, changeToggle,postApi,validateOnChange = fa
     const handleSubmit = () => {
         if (validate()) {            
         console.log(input);        
-        postApi(input);        
+        postApi(input); 
+        notify()       
         resetForm();
         changeToggle();
         }
@@ -130,7 +131,7 @@ function CreateEmployeeForm({ values, changeToggle,postApi,validateOnChange = fa
         subTitle="Form design with validation"
         icon={<PeopleOutlineTwoToneIcon fontSize="large" />}
         />
-        <FormControl className={classes.root}  >
+        <FormControl className={classes.root} >
             <Grid container>
                 <Grid item xs={6}>
                     <TextField
@@ -141,6 +142,7 @@ function CreateEmployeeForm({ values, changeToggle,postApi,validateOnChange = fa
                         onChange={handleInputChange}
                         error={errors.firstName}
                      />
+                     
                     <TextField
                         variant="outlined"
                         label="last Name"
@@ -222,6 +224,13 @@ function CreateEmployeeForm({ values, changeToggle,postApi,validateOnChange = fa
                         onChange={handleInputChange}
                         error={errors.salary}
                     />
+                      <TextField
+                        variant="outlined"
+                        name="id"
+                        value={input.id}
+                        onChange={handleInputChange}
+                        type="hidden"
+                     />
                     <br></br>
                     <br></br>
                     <br></br>
@@ -230,10 +239,9 @@ function CreateEmployeeForm({ values, changeToggle,postApi,validateOnChange = fa
                         size="large"
                         color="primary"
                         classes={{ root: classes.root, label: classes.label }}
-                       
                         onClick={()=>{
                             handleSubmit()
-                            notify()
+                            
                             }}           
                     >
                         Submit

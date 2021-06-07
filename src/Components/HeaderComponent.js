@@ -9,7 +9,7 @@ import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import SearchIcon from '@material-ui/icons/Search';
 
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme)=>({
     root:{
         backgroundColor:'#fff'
     },
@@ -22,10 +22,13 @@ const useStyles = makeStyles({
         backgroundColor:'#f2f2f2'
     },
     '& .MuiSvgIcon-root':{
-        marginRight:'8px'
+        marginRight:'20px'
     },
+    IconButton:{
+        marginLeft:theme.spacing(2)
+    }
    
-})
+}))
 
 
 const  HeaderComponent=()=>
@@ -46,15 +49,15 @@ const  HeaderComponent=()=>
                             <Grid item >
                                 <IconButton >
                                     <Badge badgeContent={4} color="secondary" >
-                                       <NotificationsNoneIcon/>  
+                                       <NotificationsNoneIcon className={classes.IconButton}/>  
                                     </Badge>
                                     
                                     <Badge badgeContent={4} color="primary">
-                                       <ChatBubbleOutlineIcon/>
+                                       <ChatBubbleOutlineIcon className={classes.IconButton}/>
                                     </Badge>
                                     
                                     <Badge  >
-                                       <PowerSettingsNewIcon/>
+                                       <PowerSettingsNewIcon className={classes.IconButton}/>
                                     </Badge>
                                 </IconButton>
                             </Grid>

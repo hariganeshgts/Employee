@@ -8,7 +8,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import AddIcon from '@material-ui/icons/Add';
-import { Button, ThemeProvider } from '@material-ui/core';
+import { Button, DialogContent, Typography} from '@material-ui/core';
 import PageHeader from '../PageHeader';
 import PeopleOutlineTwoToneIcon from '@material-ui/icons/PeopleOutline';
 import TextField from '@material-ui/core/TextField';
@@ -28,49 +28,101 @@ import{toast} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme)=>({
 
   table: {
     minWidth: 650,
   },
+  Button:{
+    marginLeft:theme.spacing(1)
+  },
+  addButton:{
+    marginBottom:theme.spacing(1)
+  },
+  textField: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    width: 200,
+}
  
 
-});
+}));
 
 
 toast.configure()
 
-export default function DenseTable({setUpdate,edit, values,Toggle,Delete,Update}) {
+export default function DenseTable({ values,Toggle,Delete,Update}) {
 
   const classes = useStyles();
-  
+  const [modelIsOpen,setModelIsOpen] =useState(false);
+  const[edit,setEdit]=useState(''); 
   const [open, setOpen] = React.useState(false);
+  const [view,setView]=useState(false);
+  const [q,setQ]=useState('')
   const notify=()=>{
     toast.error('Employee is successfully deleted',{position:toast.POSITION.TOP_CENTER});
   }
 
-  const handleSubmit=(id)=>{
-    Update(id,edit)
+  const handleSubmit=()=>{
+    console.log(edit);
+    Update(edit);
   }
 
+  const handleInputChange = e => {
+    
+    const { name,value } = e.target
+  setEdit({
+      ...edit,
+      [name]: value
+  })
+}
 
-  const handleInputChange=()=>{
-   setUpdate();
+  //View Dialog Box
+  const View=(rowData)=>{
+    setView(rowData);
+    setView(true);
+    
+  }
+  ///Close Dialog Box
+  const closeView=()=>{
+    setView(false)
   }
 
-  const handleClickOpen = () => {
-   
+  //Edit DialogOpen 
+  const handleClickOpen = (rowData) => {
+    setEdit(rowData);
     setOpen(true);
+   
   };
-
+  //Edit Dialog Close
   const handleClose = () => {
     setOpen(false);
+    
   };
 
 //toggle
   const goggle = () => {
     Toggle();
   }
+  //Delete PopUp
+  const modelView=(row)=>{
+   setEdit(row);
+    setModelIsOpen(true);
+
+  }
+//Delete PopUp Close
+const modelClose=()=>{
+  setModelIsOpen(false);
+}
+//is Delete
+const isDelete=(edit)=>{
+  Delete(edit._id);
+  notify();
+  modelClose();
+}
+const search=(values)=>{
+  return values.employees.filter(row=> row.firstName.toLowerCase().indexOf(q) > -1)
+}
  
 
 
@@ -82,7 +134,13 @@ return (
         icon={<PeopleOutlineTwoToneIcon fontSize="large" />}
       />
       <Paper>
-        <Button variant="contained" color="primary" size="small" onClick={goggle}><AddIcon />Add New</Button>
+        <Button variant="contained" color="primary" size="small" onClick={goggle} className={classes.addButton}><AddIcon />Add New</Button>
+        <TextField 
+        variant="outlined" 
+        type='text' 
+        value={q} 
+        onChange={(e)=>setQ(e.target.value)}
+        className={classes.textField} ></TextField>
         <br></br>
         <br></br>
         <TableContainer component={Paper}>
@@ -106,16 +164,15 @@ return (
                   <TableCell >{row.email}</TableCell>
                   <TableCell >{row.phoneNumber}</TableCell>
                   <TableCell>
-                    <Button variant="contained" color="primary" onClick={()=>{Update(row._id)
-                    handleClickOpen()}}>
+                    <Button variant="contained" color="primary" size="small" className={classes.Button} onClick={()=>
+                    handleClickOpen(row)}>
                       UPDATE
                   </Button>
-                    <Button variant="contained" color="secondary" onClick={()=>{
-                      Delete(row._id)
-                      notify()}} >
+                    <Button variant="contained" color="secondary" size="small"  className={classes.Button} onClick={()=>{
+                      modelView(row)}} >
                       DELETE
                   </Button>
-                    <Button variant="contained" color="default" onClick={handleClickOpen} >
+                    <Button variant="contained" color="default" size="small"  className={classes.Button } onClick={()=>View(row)}  >
                       View
                   </Button>
 
@@ -127,30 +184,28 @@ return (
         </TableContainer>
         <Dialog open={open} onClose={handleClose}  className={classes.Dialog} aria-labelledby="form-dialog-title">
           <DialogTitle id="form-dialog-title">Edit Employee</DialogTitle>
-        
             <Grid container>
               <Grid item xs={6}>
                 <TextField
                   variant="outlined"
                   label="First Name"
                   name="firstName"
+                  value={edit.firstName}
                   onChange={handleInputChange}
-                  value={values.firstName}
-                
                 />
                 <TextField
                   variant="outlined"
                   label="last Name"
                   name="lastName"
                   onChange={handleInputChange}
-                  value={values.lastName}
+                  value={edit.lastName}
                 />
                 <TextField
                   variant="outlined"
                   label="Birthday"
                   type="date"
                   name="dob"
-                  value={values.dob}
+                  value={edit.dob}
                   onChange={handleInputChange}
                   className={classes.textField}
                   InputLabelProps={{
@@ -163,28 +218,28 @@ return (
                   label="Email"
                   name="email"
                   onChange={handleInputChange}
-                  value={values.email}
+                  value={edit.email}
                 />
                 <TextField
                   variant="outlined"
                   label="address"
                   name="address"
                   onChange={handleInputChange}
-                  value={values.address}
+                  value={edit.address}
                 />
                 <TextField
                   variant="outlined"
                   label="Phone Number"
                   name="phoneNumber"
                   onChange={handleInputChange}
-                  value={values.phoneNumber}
+                  value={edit.phoneNumber}
                 />
               </Grid>
               <Grid item xs={6}>
                 <FormControl>
                   <InputLabel variant='outlined'
                   >Designation</InputLabel>
-                  <Select value={values.value}>
+                  <Select value={edit.value} onChange={handleInputChange} name="desigNation">
                     <MenuItem value={"Senior Developer"}>Senior Developer</MenuItem>
                     <MenuItem value={"Junior Developer"}>Junior Developer</MenuItem>
                     <MenuItem value={"human Resource"}>Human Resource</MenuItem>
@@ -196,10 +251,10 @@ return (
                   label="City"
                   name="city"
                   onChange={handleInputChange}
-                  value={values.city}
+                  value={edit.city}
                 />
                 <FormLabel component="legend">Gender</FormLabel>
-                <RadioGroup name="gender" row={true} value={values.gender}>
+                <RadioGroup name="gender" row={true} value={edit.gender}>
                   <FormControlLabel value="female" control={<Radio />} label="Female" />
                   <FormControlLabel value="male" control={<Radio />} label="Male" />
                   <FormControlLabel value="other" control={<Radio />} label="Other" />
@@ -209,7 +264,7 @@ return (
                   label="Salary in Rupees"
                   name="salary"
                   onChange={handleInputChange}
-                  value={values.salary}
+                  value={edit.salary}
                 />
                 <br></br>
                 <br></br>
@@ -225,8 +280,117 @@ return (
            }} color="primary">
               Submit
           </Button>
-          </DialogActions>
+        </DialogActions>
         </Dialog>
+        <Dialog open={view} onClose={closeView}  className={classes.Dialog} aria-labelledby="form-dialog-title">
+          <DialogTitle id="form-dialog-title">View Employee</DialogTitle>
+          
+            <Grid container>
+              <Grid item xs={6}>
+                <TextField
+                  variant="outlined"
+                  label="First Name"
+                  name="firstName"
+                  value={edit.firstName}
+                 />
+                <TextField
+                  variant="outlined"
+                  label="last Name"
+                  name="lastName"
+                  value={edit.lastName}
+                />
+                <TextField
+                  variant="outlined"
+                  label="Birthday"
+                  type="date"
+                  name="dob"
+                  value={edit.dob}
+                  className={classes.textField}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+                <TextField
+
+                  variant="outlined"
+                  label="Email"
+                  name="email"
+                  value={edit.email}
+                />
+                <TextField
+                  variant="outlined"
+                  label="address"
+                  name="address"
+                  value={edit.address}
+                />
+                <TextField
+                  variant="outlined"
+                  label="Phone Number"
+                  name="phoneNumber"
+                  value={edit.phoneNumber}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <FormControl>
+                  <InputLabel variant='outlined'
+                  >Designation</InputLabel>
+                  <Select value={edit.value}  name="desigNation">
+                    <MenuItem value={"Senior Developer"}>Senior Developer</MenuItem>
+                    <MenuItem value={"Junior Developer"}>Junior Developer</MenuItem>
+                    <MenuItem value={"human Resource"}>Human Resource</MenuItem>
+                  </Select>
+                </FormControl>
+                <br></br>
+                <TextField
+                  variant="outlined"
+                  label="City"
+                  name="city"
+                  value={edit.city}
+                />
+                <FormLabel component="legend">Gender</FormLabel>
+                <RadioGroup name="gender" row={true} value={edit.gender}>
+                  <FormControlLabel value="female" control={<Radio />} label="Female" />
+                  <FormControlLabel value="male" control={<Radio />} label="Male" />
+                  <FormControlLabel value="other" control={<Radio />} label="Other" />
+                </RadioGroup>
+                <TextField
+                  variant="outlined"
+                  label="Salary in Rupees"
+                  name="salary"
+                  value={edit.salary}
+                />
+                <br></br>
+                <br></br>
+                <br></br>
+              </Grid>
+            </Grid>
+          <DialogActions>
+            <Button onClick={closeView} color="primary">
+              Cancel
+          </Button>
+        </DialogActions>
+        </Dialog> 
+        <Dialog open={modelIsOpen}  onClose={closeView}>
+            <DialogTitle>
+              <DialogContent>
+              <Typography varient='h6'>
+                  Warning
+                </Typography>
+                <Typography varient='subtitle2'>
+                       Are You Sure,You Need To Delete Record?
+                </Typography>
+                </DialogContent>
+              <DialogActions>
+                <Button varient='contained' color='default' onClick={()=>modelClose()}>
+                  No
+                </Button>
+                <Button varient='contained' color='secondary' onClick={()=> isDelete(edit)
+               }>
+                  Yes
+                </Button>
+              </DialogActions>
+            </DialogTitle>
+       </Dialog>     
       </Paper>
     </div>
   );

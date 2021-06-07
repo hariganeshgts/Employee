@@ -18,7 +18,7 @@ function Employee(){
     const [values, setValues] = useState('');
     
     const [toggle,setToggle] = useState(true);
-    const[edit,setEdit]=useState('');   
+      
  
     const classes= useStyles();
 
@@ -29,11 +29,11 @@ function Employee(){
         setToggle(true);
       
     }
+   
+ 
+   
     
-    
-
-    
-     const getapi=()=> {  
+        const getapi=()=> {  
     //**import all employees */
       
       const url="https://emp-crud-swagger.herokuapp.com/Employees"  
@@ -48,10 +48,11 @@ function Employee(){
         })
         .catch(err => { console.log(err); 
         });
-       
-        console.log(values);
-       
-    }  
+      }  
+      console.log(values);
+
+      
+     
 
     
       
@@ -63,7 +64,7 @@ function Employee(){
                     "content-type": "application/json",
                     "accept": "application/json"
                 },
-                "body": JSON.stringify({ ...values,
+                "body": JSON.stringify({
                     firstName: input.firstName,
                     lastName:input.lastName,
                     dob:input.dob,
@@ -85,8 +86,10 @@ function Employee(){
                     console.log(err);
                 });
                 
+                
         }
-     
+  
+       
      
      //delete function
       const Delete = (id) => {
@@ -106,43 +109,44 @@ function Employee(){
         .catch(err => {
           console.log(err);
         });
-        console.log(id);
-     }
+    
+       }
         //Update
-          const Update = (id) => {
+          const Update = (inputData) => {
+           
+         
         // this will update entries with PUT
-              fetch(`https://emp-crud-swagger.herokuapp.com/Employees/${id}`, {
+              fetch(`https://emp-crud-swagger.herokuapp.com/Employees/${inputData._id}`, {
               "method": "PUT",
               "headers": {
                   "content-type": "application/json",
                   "accept": "application/json"
               },
               "body": JSON.stringify({
-                    firstName: edit.firstName,
-                    lastName: edit.lasttName,
-                    dob:edit.dob,
-                    email:edit.email,
-                    address:edit.address,
-                    phoneNumber: edit.phoneNumber,
-                    designation: edit.designation,
-                    city:edit.city,
-                    gender: edit.gender,
-                    salary: edit.salary,
+                   
+                    firstName: inputData.firstName,
+                    lastName:inputData.lasttName,
+                    dob:inputData.dob,
+                    email:inputData.email,
+                    address:inputData.address,
+                    phoneNumber: inputData.phoneNumber,
+                    designation:inputData.designation,
+                    city:inputData.city,
+                    gender: inputData.gender,
+                    salary:inputData.salary,
               })
               })
               .then(response => response.json())
-              .then(response => { 
-                setEdit(
-                 response
-                )
-               
+              .then(response => { console.log(response);
+              
+              
               })
              .catch(err => { console.log(err); });
-            
+             
             }
-            useEffect(()=>{getapi()},[])
+            
 
-     
+            useEffect(()=>{getapi()},[])
      // console.log(values);
 
     return(
