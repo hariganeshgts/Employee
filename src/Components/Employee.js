@@ -5,6 +5,8 @@ import DataTable from './pages/DataTable';
 import TextField from '@material-ui/core/TextField';
 import PageHeader from './PageHeader';
 import PeopleOutlineTwoToneIcon from '@material-ui/icons/PeopleOutline';
+import Pagination from './Pagination';
+import { getPanelId } from '@material-ui/lab';
 
 
 
@@ -22,9 +24,10 @@ function Employee() {
   const [values, setValues] = useState('');
 
   const [toggle, setToggle] = useState(true);
-  const [q, setQ] = useState('');
-  
-  
+  const [search, setSearch] = useState('');
+
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
 
   const classes = useStyles();
@@ -38,22 +41,44 @@ function Employee() {
   }
 
 
-  const search = () => {
-    if(q===''){
-      return values.employees
-    }else{
-    
+  // const shallSearch = () => {
+  //   if (search == '') {
+        
+  //     return values.employees
+  //   } else {
+  //     const url = `https://emp-crud-swagger.herokuapp.com/Employees?firstName=${search}&page=${page}&&limit=${rowsPerPage}`
+  //     fetch(url)
+  //       .then(response => response.json())
+  //       .then(response => {
 
-    return values.employees.filter(row => row.firstName.toLowerCase() === q.toLowerCase())
-  }
-  }
+  //         console.log(response);
 
+  //       })
+  //       .catch(err => {
+  //         console.log(err);
+  //       });
+
+  //     return (values.employees.filter(row => row.firstName.toLowerCase() === search.toLowerCase()));
+
+  //   }
+  // }
+
+  useEffect(() => { getapi()  }, [page, rowsPerPage,search])
 
 
   const getapi = () => {
     //**import all employees */
 
-    const url = "https://emp-crud-swagger.herokuapp.com/Employees"
+    let url = `https://emp-crud-swagger.herokuapp.com/Employees`
+    if(page){
+      url=url+`?page=${page}`
+    }
+    if(rowsPerPage){
+      url=url+`&limit=${rowsPerPage}`
+    }
+    if(search){
+      url=url+`&firstName=${search}`
+    }
     fetch(url)
       .then(response => response.json())
       .then(response => {
@@ -68,7 +93,10 @@ function Employee() {
       });
   }
 
-  
+
+
+
+
 
 
 
@@ -163,8 +191,21 @@ function Employee() {
 
   }
 
+  const handleChangePage = (event, page) => {
+    setPage(page);
+  };
 
-  useEffect(() => { getapi() }, [])
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(1);
+  };
+
+  const handlechange = (e) => {
+    setSearch(e.target.value);
+  }
+
+
+
   // console.log(values);
 
 
@@ -182,11 +223,13 @@ function Employee() {
             <TextField
               variant="outlined"
               type='text'
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
+              value={search}
+              onChange={handlechange}
               className={classes.textField}></TextField>
-            <DataTable values={search(values)} Toggle={removeToggle} Delete={Delete} Update={Update} postApi={postApi} />
+            <DataTable values={values} Toggle={removeToggle} Delete={Delete} Update={Update} postApi={postApi} />
+            <Pagination values={values} handleChangePage={handleChangePage} handleChangeRowsPerPage={handleChangeRowsPerPage} page={page} rowsPerPage={rowsPerPage} />
           </div>}
+
       </Paper>
     </>
   )

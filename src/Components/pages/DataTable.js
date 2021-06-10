@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -24,83 +24,6 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import IconButton from '@material-ui/core/IconButton';
-import FirstPageIcon from '@material-ui/icons/FirstPage';
-import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
-import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
-import LastPageIcon from '@material-ui/icons/LastPage';
-import PropTypes from 'prop-types';
-import TableFooter from '@material-ui/core/TableFooter';
-import TablePagination from '@material-ui/core/TablePagination';
-
-
-const useStyles1 = makeStyles((theme) => ({
-  root: {
-    flexShrink: 0,
-    marginLeft: theme.spacing(2.5),
-  },
-}));
-
-function TablePaginationActions(props) {
-  const classes = useStyles1();
-  const theme = useTheme();
-  const { count, page, rowsPerPage, onChangePage } = props;
-
-  const handleFirstPageButtonClick = (event) => {
-    onChangePage(event, 0);
-  };
-
-  const handleBackButtonClick = (event) => {
-    onChangePage(event, page - 1);
-  };
-
-  const handleNextButtonClick = (event) => {
-    onChangePage(event, page + 1);
-  };
-
-  const handleLastPageButtonClick = (event) => {
-    onChangePage(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
-  };
-
-  return (
-    <div className={classes.root}>
-      <IconButton
-        onClick={handleFirstPageButtonClick}
-        disabled={page === 0}
-        aria-label="first page"
-      >
-        {theme.direction === 'rtl' ? <LastPageIcon /> : <FirstPageIcon />}
-      </IconButton>
-      <IconButton onClick={handleBackButtonClick} disabled={page === 0} aria-label="previous page">
-        {theme.direction === 'rtl' ? <KeyboardArrowRight /> : <KeyboardArrowLeft />}
-      </IconButton>
-      <IconButton
-        onClick={handleNextButtonClick}
-        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-        aria-label="next page"
-      >
-        {theme.direction === 'rtl' ? <KeyboardArrowLeft /> : <KeyboardArrowRight />}
-      </IconButton>
-      <IconButton
-        onClick={handleLastPageButtonClick}
-        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-        aria-label="last page"
-      >
-        {theme.direction === 'rtl' ? <FirstPageIcon /> : <LastPageIcon />}
-      </IconButton>
-    </div>
-  );
-}
-
-TablePaginationActions.propTypes = {
-  count: PropTypes.number.isRequired,
-  onChangePage: PropTypes.func.isRequired,
-  page: PropTypes.number.isRequired,
-  rowsPerPage: PropTypes.number.isRequired,
-}
-
-
-
 const useStyles = makeStyles((theme) => ({
 
   table: {
@@ -126,26 +49,13 @@ const useStyles = makeStyles((theme) => ({
 toast.configure()
 
 export default function DenseTable({ values, Toggle, Delete, Update }) {
+  console.log(values)
+ 
 
   const classes = useStyles();
   const [modelIsOpen, setModelIsOpen] = useState(false);
   const [edit, setEdit] = useState('');
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
-  const emptyRows = rowsPerPage - Math.min(rowsPerPage, values.length - page * rowsPerPage);
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-
-
+  const [look,setLook]= useState('');
   const [open, setOpen] = React.useState(false);
   const [view, setView] = useState(false);
 
@@ -171,8 +81,8 @@ export default function DenseTable({ values, Toggle, Delete, Update }) {
   }
 
   //View Dialog Box
-  const View = (rowData) => {
-    setView(rowData);
+  const View = (data) => {
+    setLook(data)
     setView(true);
 
   }
@@ -189,6 +99,7 @@ export default function DenseTable({ values, Toggle, Delete, Update }) {
   };
   //Edit Dialog Close
   const handleClose = () => {
+    handleSubmit()
     setOpen(false);
 
   };
@@ -237,9 +148,7 @@ export default function DenseTable({ values, Toggle, Delete, Update }) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {(rowsPerPage > 0
-            ? values.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            :values).map((row) => (
+              {values.employees.map((row) => (
                 <TableRow key={row._id}>
                   <TableCell component="th" scope="row">
                     {row.firstName}
@@ -264,32 +173,9 @@ export default function DenseTable({ values, Toggle, Delete, Update }) {
                   </TableCell>
                 </TableRow>
               ))}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: 53 * emptyRows }}>
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
+              
             </TableBody>
-            <TableFooter>
-          <TableRow>
-            <TablePagination
-              rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
-              colSpan={3}
-              count={values.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              SelectProps={{
-                inputProps: { 'aria-label': 'rows per page' },
-                native: true,
-              }}
-              onChangePage={handleChangePage}
-              onChangeRowsPerPage={handleChangeRowsPerPage}
-              ActionsComponent={TablePaginationActions}
-            />
-          </TableRow>
-        </TableFooter>
-
-          </Table>
+            </Table>
         </TableContainer>
         <Dialog open={open} onClose={handleClose} className={classes.Dialog} aria-labelledby="form-dialog-title">
           <DialogTitle id="form-dialog-title">Edit Employee</DialogTitle>
@@ -386,7 +272,7 @@ export default function DenseTable({ values, Toggle, Delete, Update }) {
           </Button>
             <Button onClick={() => {
               handleClose()
-              handleSubmit()
+             
             }} color="primary">
               Submit
           </Button>
@@ -401,20 +287,20 @@ export default function DenseTable({ values, Toggle, Delete, Update }) {
                 variant="outlined"
                 label="First Name"
                 name="firstName"
-                value={edit.firstName}
+                value={look.firstName}
               />
               <TextField
                 variant="outlined"
                 label="last Name"
                 name="lastName"
-                value={edit.lastName}
+                value={look.lastName}
               />
               <TextField
                 variant="outlined"
                 label="Birthday"
                 type="date"
                 name="dob"
-                value={edit.dob}
+                value={look.dob}
                 className={classes.textField}
                 InputLabelProps={{
                   shrink: true,
@@ -425,26 +311,26 @@ export default function DenseTable({ values, Toggle, Delete, Update }) {
                 variant="outlined"
                 label="Email"
                 name="email"
-                value={edit.email}
+                value={look.email}
               />
               <TextField
                 variant="outlined"
                 label="address"
                 name="address"
-                value={edit.address}
+                value={look.address}
               />
               <TextField
                 variant="outlined"
                 label="Phone Number"
                 name="phoneNumber"
-                value={edit.phoneNumber}
+                value={look.phoneNumber}
               />
             </Grid>
             <Grid item xs={6}>
               <FormControl>
                 <InputLabel variant='outlined'
                 >Designation</InputLabel>
-                <Select value={edit.value} name="desigNation">
+                <Select value={look.value} name="desigNation">
                   <MenuItem value={"Senior Developer"}>Senior Developer</MenuItem>
                   <MenuItem value={"Junior Developer"}>Junior Developer</MenuItem>
                   <MenuItem value={"human Resource"}>Human Resource</MenuItem>
@@ -455,10 +341,10 @@ export default function DenseTable({ values, Toggle, Delete, Update }) {
                 variant="outlined"
                 label="City"
                 name="city"
-                value={edit.city}
+                value={look.city}
               />
               <FormLabel component="legend">Gender</FormLabel>
-              <RadioGroup name="gender" row={true} value={edit.gender}>
+              <RadioGroup name="gender" row={true} value={look.gender}>
                 <FormControlLabel value="female" control={<Radio />} label="Female" />
                 <FormControlLabel value="male" control={<Radio />} label="Male" />
                 <FormControlLabel value="other" control={<Radio />} label="Other" />
@@ -467,7 +353,7 @@ export default function DenseTable({ values, Toggle, Delete, Update }) {
                 variant="outlined"
                 label="Salary in Rupees"
                 name="salary"
-                value={edit.salary}
+                value={look.salary}
               />
               <br></br>
               <br></br>
